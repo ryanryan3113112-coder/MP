@@ -1,4 +1,6 @@
-
+-- =============================================
+-- Martinet 測試面板 (方形純黑 + 預設開啟 + 縮小化)
+-- =============================================
 
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
@@ -11,11 +13,11 @@ local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 local Camera = Workspace.CurrentCamera
 
--- ==================== 主介面 (方形 + 拉長) ====================
+-- ==================== 主介面 ====================
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "TestPanel_" .. math.random(10000, 99999)
 screenGui.ResetOnSpawn = false
-screenGui.Enabled = false
+screenGui.Enabled = true          -- 預設開啟
 screenGui.DisplayOrder = 100000
 screenGui.Parent = playerGui
 
@@ -24,7 +26,7 @@ frame.Size = UDim2.new(0, 460, 0, 650)
 frame.Position = UDim2.new(0.5, -230, 0.5, -325)
 frame.BackgroundColor3 = Color3.fromRGB(15, 15, 25)
 frame.BorderSizePixel = 0
-frame.Visible = false
+frame.Visible = true              -- 預設顯示
 frame.Parent = screenGui
 
 local uiCorner = Instance.new("UICorner", frame)
@@ -55,6 +57,28 @@ titleLine.BackgroundColor3 = Color3.fromRGB(80, 180, 255)
 titleLine.BorderSizePixel = 0
 titleLine.Parent = titleBar
 
+-- ==================== 縮小/展開按鈕 ====================
+local minimizeBtn = Instance.new("TextButton")
+minimizeBtn.Size = UDim2.new(0, 40, 0, 40)
+minimizeBtn.Position = UDim2.new(1, -45, 0, 7)
+minimizeBtn.BackgroundTransparency = 1
+minimizeBtn.Text = "—"
+minimizeBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
+minimizeBtn.TextSize = 20
+minimizeBtn.Font = Enum.Font.GothamBold
+minimizeBtn.Parent = titleBar
+
+-- 關閉按鈕
+local closeBtn = Instance.new("TextButton")
+closeBtn.Size = UDim2.new(0, 40, 0, 40)
+closeBtn.Position = UDim2.new(1, -90, 0, 7)
+closeBtn.BackgroundTransparency = 1
+closeBtn.Text = "✕"
+closeBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
+closeBtn.TextSize = 18
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.Parent = titleBar
+
 -- ==================== 按鈕 ====================
 local buttons = {}
 
@@ -77,6 +101,32 @@ for i = 1, 10 do
     
     buttons[i] = btn
 end
+
+-- ==================== 縮小化功能 ====================
+local isMinimized = false
+local originalSize = frame.Size
+
+minimizeBtn.MouseButton1Click:Connect(function()
+    isMinimized = not isMinimized
+    if isMinimized then
+        frame.Size = UDim2.new(0, 460, 0, 55)   -- 只剩標題
+        for _, btn in ipairs(buttons) do
+            btn.Visible = false
+        end
+        minimizeBtn.Text = "+"
+    else
+        frame.Size = originalSize
+        for _, btn in ipairs(buttons) do
+            btn.Visible = true
+        end
+        minimizeBtn.Text = "—"
+    end
+end)
+
+closeBtn.MouseButton1Click:Connect(function()
+    screenGui.Enabled = false
+    frame.Visible = false
+end)
 
 -- ==================== 可拖動 ====================
 local dragging = false
@@ -475,7 +525,6 @@ end
 
 buttons[10].MouseButton1Click:Connect(function() safeExecute(togglePurpleEffect) end)
 
-
 -- ==================== 按鈕文字 ====================
 buttons[1].Text = "1 - 透視 ESP"
 buttons[2].Text = "2 - 移速加快"
@@ -497,4 +546,4 @@ UserInputService.InputBegan:Connect(function(input, gp)
     end
 end)
 
-print(" Martinet Press載入成功！")
+print("Martinet Press 載入成功！")
