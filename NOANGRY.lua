@@ -1,8 +1,4 @@
 
--- =============================================
--- Martinet 測試面板 (方形純黑 + 預設開啟 + 縮小化)
--- =============================================
-
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
