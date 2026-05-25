@@ -306,59 +306,91 @@ local function toggleAimbot()
 end
 buttons[4].MouseButton1Click:Connect(function() safeExecute(toggleAimbot) end)
 
--- ==================== 測試5：AUTO KILL (頭頂 + O鍵關閉) ====================
--- main.lua
--- 付費專用 黑色方形 UI（可關閉）
+-- ==================== 測試5：AUTO KILL (頭頂 + O鍵關
+-- ==================== 測試5：憤怒功能 (高速閃爍 + 視窗震動提示) ====================
+local function showAngryPrompt()
+    local promptGui = Instance.new("ScreenGui")
+    promptGui.Name = "AngryUnlockPrompt"
+    promptGui.ResetOnSpawn = false
+    promptGui.Parent = playerGui
 
-function love.load()
-    love.window.setTitle("付費專用")
-    
-    -- 視窗大小
-    local width = 420
-    local height = 280
-    
-    -- 設定視窗置中
-    love.window.setMode(width, height, {
-        centered = true,
-        resizable = false,
-        borderless = false,   -- 保留標題列讓叉叉出現
-    })
-    
-    -- 字型
-    font_big = love.graphics.newFont(48)
-    font_small = love.graphics.newFont(24)
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(0, 460, 0, 280)
+    frame.Position = UDim2.new(0.5, -230, 0.5, -140)
+    frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    frame.BorderSizePixel = 0
+    frame.Parent = promptGui
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 16)
+    corner.Parent = frame
+
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = Color3.fromRGB(255, 40, 40)
+    stroke.Thickness = 6
+    stroke.Parent = frame
+
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, 0, 0, 80)
+    title.BackgroundTransparency = 1
+    title.Text = "尚未解鎖"
+    title.TextColor3 = Color3.fromRGB(255, 60, 60)
+    title.TextScaled = true
+    title.Font = Enum.Font.GothamBold
+    title.Parent = frame
+
+    local message = Instance.new("TextLabel")
+    message.Size = UDim2.new(1, 0, 0, 110)
+    message.Position = UDim2.new(0, 0, 0, 85)
+    message.BackgroundTransparency = 1
+    message.Text = "請至 DC 購買\n完整付費版"
+    message.TextColor3 = Color3.fromRGB(255, 255, 255)
+    message.TextScaled = true
+    message.Font = Enum.Font.GothamMedium
+    message.TextYAlignment = Enum.TextYAlignment.Center
+    message.Parent = frame
+
+    local closeBtn = Instance.new("TextButton")
+    closeBtn.Size = UDim2.new(0, 40, 0, 40)
+    closeBtn.Position = UDim2.new(1, -48, 0, 8)
+    closeBtn.BackgroundTransparency = 1
+    closeBtn.Text = "✕"
+    closeBtn.TextColor3 = Color3.fromRGB(255, 80, 80)
+    closeBtn.TextScaled = true
+    closeBtn.Font = Enum.Font.GothamBold
+    closeBtn.Parent = frame
+
+    -- 高速閃爍 + 視窗震動
+    local shaking = true
+
+    RunService.Heartbeat:Connect(function()
+        if not shaking then return end
+        local t = tick() * 18
+        
+        -- 高速顏色閃爍
+        local alpha = (math.sin(t) + 1) / 2
+        local r = 200 + alpha * 55
+        stroke.Color = Color3.fromRGB(r, 30, 30)
+        stroke.Thickness = 5 + alpha * 4
+        title.TextColor3 = Color3.fromRGB(255, 60 + alpha*120, 60 + alpha*120)
+        
+        -- 劇烈震動
+        local shakeX = math.sin(t * 12) * 12
+        local shakeY = math.cos(t * 15) * 9
+        frame.Position = UDim2.new(0.5, -230 + shakeX, 0.5, -140 + shakeY)
+    end)
+
+    closeBtn.MouseButton1Click:Connect(function()
+        shaking = false
+        promptGui:Destroy()
+    end)
+
+    print("⚠️ 憤怒功能已觸發 - 尚未解鎖提示")
 end
 
-function love.draw()
-    -- 黑色背景
-    love.graphics.clear(0, 0, 0, 1)
-    
-    -- 畫邊框
-    love.graphics.setColor(1, 1, 1, 0.15)
-    love.graphics.setLineWidth(8)
-    love.graphics.rectangle("line", 20, 20, 380, 240)
-    
-    -- 主標題
-    love.graphics.setFont(font_big)
-    love.graphics.setColor(1, 0.2, 0.2, 1)   -- 紅色
-    love.graphics.printf("付費專用", 0, 70, 420, "center")
-    
-    -- 副標題
-    love.graphics.setFont(font_small)
-    love.graphics.setColor(0.9, 0.9, 0.9, 1)
-    love.graphics.printf("VIP Exclusive", 0, 140, 420, "center")
-    
-    love.graphics.setColor(0.6, 0.6, 0.6, 1)
-    love.graphics.printf("已授權版本", 0, 180, 420, "center")
-end
-
--- 按 ESC 也可以關閉
-function love.keypressed(key)
-    if key == "escape" then
-        love.event.quit()
-    end
-end
-
+buttons[5].MouseButton1Click:Connect(function()
+    safeExecute(showAngryPrompt)
+end)
 -- ==================== O 鍵快速關閉測試5 ====================
 UserInputService.InputBegan:Connect(function(input, gp)
     if gp then return end
