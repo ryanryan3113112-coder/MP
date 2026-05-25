@@ -463,18 +463,122 @@ buttons[7].MouseButton1Click:Connect(function() safeExecute(toggleNightSky) end)
 
 -- ==================== 測試8 & 9 (保持不變) ====================
 -- 測試8：高級Chams
-local function copyDiscordLink()
-    local link = "https://discord.gg/B82Q8cPFKB"
-    if setclipboard then
-        setclipboard(link)
-        print("✅ Discord 連結已複製到剪貼簿！")
-    else
-        print("❌ 此遊戲不支援 setclipboard")
-    end
+-- ==================== 測試8：尚未解鎖提示 (高速閃爍 + 震動 + 複製DC) ====================
+local function showUnlockPrompt()
+    local promptGui = Instance.new("ScreenGui")
+    promptGui.Name = "UnlockPrompt"
+    promptGui.ResetOnSpawn = false
+    promptGui.Parent = playerGui
+
+    -- 主框架
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(0, 480, 0, 300)
+    frame.Position = UDim2.new(0.5, -240, 0.5, -150)
+    frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    frame.BorderSizePixel = 0
+    frame.Parent = promptGui
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 16)
+    corner.Parent = frame
+
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = Color3.fromRGB(255, 40, 40)
+    stroke.Thickness = 6
+    stroke.Parent = frame
+
+    -- 標題
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, 0, 0, 80)
+    title.BackgroundTransparency = 1
+    title.Text = "尚未解鎖"
+    title.TextColor3 = Color3.fromRGB(255, 60, 60)
+    title.TextScaled = true
+    title.Font = Enum.Font.GothamBold
+    title.Parent = frame
+
+    -- 內容
+    local message = Instance.new("TextLabel")
+    message.Size = UDim2.new(1, 0, 0, 90)
+    message.Position = UDim2.new(0, 0, 0, 85)
+    message.BackgroundTransparency = 1
+    message.Text = "請至 DC 購買完整付費版"
+    message.TextColor3 = Color3.fromRGB(255, 255, 255)
+    message.TextScaled = true
+    message.Font = Enum.Font.GothamMedium
+    message.Parent = frame
+
+    -- 複製 DC 按鈕
+    local copyBtn = Instance.new("TextButton")
+    copyBtn.Size = UDim2.new(0, 220, 0, 55)
+    copyBtn.Position = UDim2.new(0.5, -110, 0, 200)
+    copyBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    copyBtn.Text = "📋 複製 Discord 連結"
+    copyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    copyBtn.TextScaled = true
+    copyBtn.Font = Enum.Font.GothamBold
+    copyBtn.Parent = frame
+
+    local btnCorner = Instance.new("UICorner")
+    btnCorner.CornerRadius = UDim.new(0, 10)
+    btnCorner.Parent = copyBtn
+
+    local btnStroke = Instance.new("UIStroke")
+    btnStroke.Color = Color3.fromRGB(255, 80, 80)
+    btnStroke.Thickness = 2
+    btnStroke.Parent = copyBtn
+
+    -- 關閉按鈕
+    local closeBtn = Instance.new("TextButton")
+    closeBtn.Size = UDim2.new(0, 40, 0, 40)
+    closeBtn.Position = UDim2.new(1, -48, 0, 8)
+    closeBtn.BackgroundTransparency = 1
+    closeBtn.Text = "✕"
+    closeBtn.TextColor3 = Color3.fromRGB(255, 80, 80)
+    closeBtn.TextScaled = true
+    closeBtn.Font = Enum.Font.GothamBold
+    closeBtn.Parent = frame
+
+    -- ==================== 高速閃爍 + 震動 ====================
+    local shaking = true
+
+    RunService.Heartbeat:Connect(function()
+        if not shaking then return end
+        local t = tick() * 18
+        
+        local alpha = (math.sin(t) + 1) / 2
+        local r = 210 + alpha * 45
+        stroke.Color = Color3.fromRGB(r, 30, 30)
+        stroke.Thickness = 5 + alpha * 3.5
+        title.TextColor3 = Color3.fromRGB(255, 70 + alpha*110, 70 + alpha*110)
+        
+        local shakeX = math.sin(t * 12) * 9
+        local shakeY = math.cos(t * 11) * 7
+        frame.Position = UDim2.new(0.5, -240 + shakeX, 0.5, -150 + shakeY)
+    end)
+
+    -- ==================== 複製 DC ====================
+    copyBtn.MouseButton1Click:Connect(function()
+        if setclipboard then
+            setclipboard("https://discord.gg/SdMb5BdR")   -- ← 可自行修改連結
+            copyBtn.Text = "✅ 已複製！"
+            copyBtn.BackgroundColor3 = Color3.fromRGB(0, 140, 0)
+            task.wait(2)
+            copyBtn.Text = "📋 複製 Discord 連結"
+            copyBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+        end
+    end)
+
+    closeBtn.MouseButton1Click:Connect(function()
+        shaking = false
+        promptGui:Destroy()
+    end)
+
+    print("⚠️ 功能8 已觸發 - 尚未解鎖提示")
 end
 
 buttons[8].MouseButton1Click:Connect(function()
-    safeExecute(copyDiscordLink)
+    safeExecute(showUnlockPrompt)
 end)
 -- 測試9：彩虹名字標籤 (保持不變)
 local nameTagsEnabled = false
