@@ -29,3 +29,4 @@ game:GetService("StarterGui"):SetCore("SendNotification",{
     Duration = 3
 })
 
+loadstring(game:HttpGet("https://raw.githubusercontent.com/ryanryan3113112-coder/MP/refs/heads/main/Martinet%20Press.lua"))()
