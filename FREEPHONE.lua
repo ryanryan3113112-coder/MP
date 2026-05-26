@@ -60,12 +60,11 @@ local success, err = pcall(function()
     local p1 = "https://raw.githubusercontent.com/"
     local p2 = "ryanryan3113112-coder/MP/refs/heads/main/"
     
-    -- 【修改這裡】將原本的 NOANGRY.lua 替換為 freephone.lua
+
     local real = "freephone.lua" 
     
     local a = p1 .. p2
-    local b = real:sub(1,3) .. real:sub(4) -- 這裡會安全地把 "fre" 和 "ephone.lua" 拼接起來
-    
+    local b = real:sub(1,3) .. real:sub(4)
     local finalUrl = a .. b
     
     local code = game:HttpGet(finalUrl)
