@@ -1,11 +1,12 @@
 
+
 local CorrectKey = "MARTINET-2026"
 
 local key = getgenv().script_key
 
 if not key then
     game:GetService("StarterGui"):SetCore("SendNotification",{
-        Title = "Key System",
+        Title = "Martinet Press",
         Text = "No Key Detected",
         Duration = 5
     })
@@ -15,7 +16,7 @@ end
 
 if key ~= CorrectKey then
     game:GetService("StarterGui"):SetCore("SendNotification",{
-        Title = "Key System",
+        Title = "Martinet Press",
         Text = "Invalid Key",
         Duration = 5
     })
@@ -24,9 +25,10 @@ if key ~= CorrectKey then
 end
 
 game:GetService("StarterGui"):SetCore("SendNotification",{
-    Title = "Key System",
+    Title = "Martinet Press",
     Text = "Key Accepted",
     Duration = 3
 })
 
+-- Load Main Script
 loadstring(game:HttpGet("https://raw.githubusercontent.com/ryanryan3113112-coder/MP/refs/heads/main/Martinet%20Press.lua"))()
