@@ -308,90 +308,69 @@ end
 buttons[4].MouseButton1Click:Connect(function() safeExecute(toggleAimbot) end)
 
 -- ==================== 測試5：AUTO KILL (頭頂 + O鍵關
--- ==================== 測試5：憤怒功能 (高速閃爍 + 視窗震動提示) ====================
-local function showAngryPrompt()
-    local promptGui = Instance.new("ScreenGui")
-    promptGui.Name = "AngryUnlockPrompt"
-    promptGui.ResetOnSpawn = false
-    promptGui.Parent = playerGui
 
-    local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(0, 460, 0, 280)
-    frame.Position = UDim2.new(0.5, -230, 0.5, -140)
-    frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    frame.BorderSizePixel = 0
-    frame.Parent = promptGui
+-- ==================== 測試5：AUTO KILL (頭頂 + O鍵關閉) ====================
+local autoKillEnabled = false
+local autoKillConnection = nil
+local lastClickTime = 0
 
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 16)
-    corner.Parent = frame
-
-    local stroke = Instance.new("UIStroke")
-    stroke.Color = Color3.fromRGB(255, 40, 40)
-    stroke.Thickness = 6
-    stroke.Parent = frame
-
-    local title = Instance.new("TextLabel")
-    title.Size = UDim2.new(1, 0, 0, 80)
-    title.BackgroundTransparency = 1
-    title.Text = "尚未解鎖"
-    title.TextColor3 = Color3.fromRGB(255, 60, 60)
-    title.TextScaled = true
-    title.Font = Enum.Font.GothamBold
-    title.Parent = frame
-
-    local message = Instance.new("TextLabel")
-    message.Size = UDim2.new(1, 0, 0, 110)
-    message.Position = UDim2.new(0, 0, 0, 85)
-    message.BackgroundTransparency = 1
-    message.Text = "請至 DC 購買\n完整付費版"
-    message.TextColor3 = Color3.fromRGB(255, 255, 255)
-    message.TextScaled = true
-    message.Font = Enum.Font.GothamMedium
-    message.TextYAlignment = Enum.TextYAlignment.Center
-    message.Parent = frame
-
-    local closeBtn = Instance.new("TextButton")
-    closeBtn.Size = UDim2.new(0, 40, 0, 40)
-    closeBtn.Position = UDim2.new(1, -48, 0, 8)
-    closeBtn.BackgroundTransparency = 1
-    closeBtn.Text = "✕"
-    closeBtn.TextColor3 = Color3.fromRGB(255, 80, 80)
-    closeBtn.TextScaled = true
-    closeBtn.Font = Enum.Font.GothamBold
-    closeBtn.Parent = frame
-
-    -- 高速閃爍 + 視窗震動
-    local shaking = true
-
-    RunService.Heartbeat:Connect(function()
-        if not shaking then return end
-        local t = tick() * 18
-        
-        -- 高速顏色閃爍
-        local alpha = (math.sin(t) + 1) / 2
-        local r = 200 + alpha * 55
-        stroke.Color = Color3.fromRGB(r, 30, 30)
-        stroke.Thickness = 5 + alpha * 4
-        title.TextColor3 = Color3.fromRGB(255, 60 + alpha*120, 60 + alpha*120)
-        
-        -- 劇烈震動
-        local shakeX = math.sin(t * 12) * 12
-        local shakeY = math.cos(t * 15) * 9
-        frame.Position = UDim2.new(0.5, -230 + shakeX, 0.5, -140 + shakeY)
-    end)
-
-    closeBtn.MouseButton1Click:Connect(function()
-        shaking = false
-        promptGui:Destroy()
-    end)
-
-    print("⚠️ 憤怒功能已觸發 - 尚未解鎖提示")
+local function findClosestTarget()
+    local closest, minDist = nil, math.huge
+    local myRoot = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    if not myRoot then return nil end
+    for _, obj in ipairs(Workspace:GetDescendants()) do
+        if obj:IsA("Model") and obj:FindFirstChild("Humanoid") and obj:FindFirstChild("HumanoidRootPart") then
+            if Players:GetPlayerFromCharacter(obj) == player then continue end
+            local hum = obj:FindFirstChild("Humanoid")
+            local root = obj:FindFirstChild("HumanoidRootPart")
+            if hum and hum.Health > 0 and root then
+                local dist = (myRoot.Position - root.Position).Magnitude
+                if dist < minDist then
+                    minDist = dist
+                    closest = obj
+                end
+            end
+        end
+    end
+    return closest
 end
 
-buttons[5].MouseButton1Click:Connect(function()
-    safeExecute(showAngryPrompt)
-end)
+local function autoKillLoop()
+    local char = player.Character
+    if not char then return end
+    local target = findClosestTarget()
+    if not target then return end
+    local targetHead = target:FindFirstChild("Head")
+    local myRoot = char:FindFirstChild("HumanoidRootPart")
+    
+    if targetHead and myRoot then
+        myRoot.CFrame = targetHead.CFrame * CFrame.new(0, 5, 0)
+    end
+    if targetHead then
+        Camera.CFrame = CFrame.new(Camera.CFrame.Position, targetHead.Position)
+    end
+    
+    if tick() - lastClickTime > 1 then
+        VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, game, 1)
+        task.wait(0.05)
+        VirtualInputManager:SendMouseButtonEvent(0, 0, 0, false, game, 1)
+        lastClickTime = tick()
+    end
+end
+
+local function toggleAutoKill()
+    autoKillEnabled = not autoKillEnabled
+    print("AUTO KILL (頭頂自動射擊)：" .. (autoKillEnabled and "✅ 開啟" or "❌ 關閉"))
+    if autoKillEnabled then
+        autoKillConnection = RunService.RenderStepped:Connect(function()
+            pcall(autoKillLoop)
+        end)
+    else
+        if autoKillConnection then autoKillConnection:Disconnect() autoKillConnection = nil end
+    end
+end
+
+buttons[5].MouseButton1Click:Connect(function() safeExecute(toggleAutoKill) end)
 -- ==================== O 鍵快速關閉測試5 ====================
 UserInputService.InputBegan:Connect(function(input, gp)
     if gp then return end
